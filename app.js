@@ -12,6 +12,33 @@ const app = express();
 
 app.use(bodyParser.json());
 
+const events = eventIds => {
+  return Event.find({_id: { $in: eventIds}})
+    .then(events => {
+      return events.map(event => {
+        return {
+          ...event._doc,
+          _id: event.id,
+          creator: user.bind(this, event.creator)
+
+        }
+      })
+    })
+    .catch( err => {throw err})
+}
+
+const user = userID => {
+  return User.findById(userID)
+    .then(user => {
+      return { 
+        ...user._doc,
+         _id: user.id,
+        createdEvents: events.bind(this, user._doc.createdEvents)}
+    })
+    .catch(err => { throw err})
+}
+
+
 app.use(
   '/graphql',
   graphqlHttp({
@@ -22,12 +49,14 @@ app.use(
           description: String!
           price: Float!
           date: String!
+          creator: User!
         }
 
         type User {
           _id: ID!
           email: String!
           password: String
+          createdEvents: [Event!]
         }
 
         input EventInput {
@@ -61,7 +90,12 @@ app.use(
         return Event.find()
           .then(events => {
             return events.map(event => {
-              return { ...event._doc, _id: event.id };
+              return {
+                 ...event._doc,
+                  _id: event.id,
+                  creator: user.bind(this, event._doc.creator)
+
+                };
             });
           })
           .catch(err => {
@@ -74,20 +108,24 @@ app.use(
           description: args.eventInput.description,
           price: +args.eventInput.price,
           date: new Date(args.eventInput.date),
-          creator: '5da6be861d50db19cc436c15'
+          creator: '5da998956927470c20171eb3'
         });
         let createdEvent;
         return event
           .save()
           .then(result => {
-            createdEvent = { ...result._doc, _id: result._doc._id.toString()};
-            return User.findById('5da6be861d50db19cc436c15');
+            createdEvent = {
+               ...result._doc,
+                _id: result._doc._id.toString(),
+               creator: user.bind(this, result._doc.creator)};
+              return User.findById('5da998956927470c20171eb3');
           })
           .then(user => {
             if(!user) {
               throw new Error('User not found');
             }
-            user.createdEvents.push(event);
+            
+            user.createdEvents.push(event); // push to user createEvents array, mongoose will extract id from event object
             return user.save();
           })
           .then(result => {
