@@ -17,7 +17,10 @@ module.exports = {
             throw err;
         }
     },
-    bookEvent: async args => {
+    bookEvent: async (args, req) => {
+        if(!req.isAuth) {
+            throw new Error('Unauthorized');
+        }
         const fetchedEvent = await Event.findOne({
             _id: args.eventId
         });
@@ -28,7 +31,10 @@ module.exports = {
         const result = await booking.save();
         return transformBooking( result);
     },
-    cancelBooking: async args => {
+    cancelBooking: async (args, req) => {
+        if(!req.isAuth) {
+            throw new Error('Unauthorized');
+        }
         try {
             const fetchedBooking = await Booking.findById(args.bookingId).populate('event');
             const event = transformEvent(fetchedBooking.event);
