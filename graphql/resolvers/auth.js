@@ -3,7 +3,10 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 module.exports = {
-    createUser: async args => {
+    createUser: async  (args, req) => {
+        if(!req.isAuth) {
+            throw new Error('Unauthorized');
+        }
         try {
             const existingUser = await User.findOne({
                 email: args.userInput.email
