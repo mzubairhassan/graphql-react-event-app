@@ -2,6 +2,8 @@ import React from 'react';
 import {BrowserRouter, Route, Redirect, Switch} from 'react-router-dom';
 
 import AuthPage from './pages/Auth';
+import BookingPage from './pages/Bookings';
+import EventPage from './pages/Events';
 import MainNavigation from './navigation/MainNavigation';
 
 
@@ -12,12 +14,14 @@ function App() {
     <BrowserRouter>
       <React.Fragment>
         <MainNavigation />
-        <Switch>
-          <Redirect path="/" to="/auth" exact />
-          <Route path="/auth" component={AuthPage} />
-          <Route path="/events" component={null} />
-          <Route path="/bookings" component={null} />
-        </Switch>
+        <main className="main-content">
+          <Switch>
+            <Redirect path="/" to="/auth" exact />
+            <Route path="/auth" component={AuthPage} />
+            <Route path="/bookings" component={BookingPage} />
+            <Route path="/events" component={EventPage} />
+          </Switch>
+        </main>
       </React.Fragment>
     </BrowserRouter>
   );
